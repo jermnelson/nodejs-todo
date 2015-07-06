@@ -191,6 +191,8 @@ app.post('/todos/create', function(req, res) {
     });
   } else {
     client.hset("todos", id, req.body.description);
+    //console.log("Now trying to add sorted set created with timestamp as zadd");
+    //client.zadd("created:todos", Date.now(), id);
     json(res, { id: id });
   }
 });
