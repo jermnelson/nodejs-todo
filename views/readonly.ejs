@@ -1,0 +1,32 @@
+<% include header %>
+
+<script>
+$(function() {
+  $.getJSON("/readonly", function(data) {
+    for(var key in data) {
+      addListEntry(key, data[key]);
+    }
+  });
+});
+
+function addListEntry(id, description) {
+
+}
+
+
+</script>
+
+<script id="todotemplate" type="template">
+
+<div class="col-md-12">
+  <ul>
+     <span class="description" />
+  </ul>
+</div>
+</script>
+
+<h2>Read-only Mode</h2>
+<div class="row" id="todos">
+</div>
+
+<% include footer %>

@@ -252,11 +252,9 @@ app.post('/todos/delete', function(req, res) {
   }
 });
 
-app.post('/readonly', ReadOnly(req, res));
 
-function ReadOnly(req, res) {
-    res.render('readonly');
-
-|
+app.get('/readonly', function(req, res) {
+ res.render('readonly');
+});
 
 server.listen(process.env.PORT || config.port);
