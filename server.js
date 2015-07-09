@@ -191,8 +191,7 @@ app.post('/todos/create', function(req, res) {
     });
   } else {
     client.hset("todos", id, req.body.description);
-    //console.log("Now trying to add sorted set created with timestamp as zadd");
-    //client.zadd("created:todos", Date.now(), id);
+    client.zadd("created:todos", Date.now(), id);
     json(res, { id: id });
   }
 });
@@ -250,6 +249,7 @@ app.post('/todos/delete', function(req, res) {
     });
   } else {
     client.hdel("todos", id);
+    client.zadd("completed:todos", Date.now(), id);
     json(res, {});
   }
 });
