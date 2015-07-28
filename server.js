@@ -11,12 +11,6 @@ var connect = require('connect');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 var fs = require('fs');
-fs.readFile('add-todo.lua', 'utf8', function (err,data) {
-  if (err) {
-    return console.log(err);
-  }
-  console.log(data);
-});
 
 var async;
 
@@ -50,6 +44,22 @@ if(dbType == 'riak') {
   });
 }
 
+var load_lua = function(lua_filename, client) {
+  fs.readFile(lua_filename, 'utf8', function (err,data) {
+  if (err) {
+    console.log(err);
+    return err;
+  }
+   
+   var lua_sha1 = client.script_load(data);
+   return lua_sha1
+ });
+}
+
+var add_lua_sha1 = load_lua('add-todo.lua', client);
+var rm_lua_sha1 = load_lua('rm-todo.lua', client);
+
+console.log("Add lua " + add_lua_sha1 + " rm lua " + rm_lua_sha1);
 app.set('view engine', 'ejs');
 app.set('view options', { layout: false });
 app.use('/public', express.static('public'));
