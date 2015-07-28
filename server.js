@@ -10,6 +10,14 @@ var secret = require('./lib/secret');
 var connect = require('connect');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
+var fs = require('fs');
+fs.readFile('add-todo.lua', 'utf8', function (err,data) {
+  if (err) {
+    return console.log(err);
+  }
+  console.log(data);
+});
+
 var async;
 
 var Riak;
@@ -75,56 +83,9 @@ app.get('/', function (req, res) {
 
 app.get('/todos', function(req, res) {
   var values;
-  if(dbType == 'riak') {
-    // Listing is not a common operation in Riak
-    // Here we store the ids of each item in a array and then we make async queries to retrieve all of them
-    client.fetchValue({ bucket: 'todos', key: 'ids', convertToJs: true},
-      function (err, rslt) {
-        var ids, todos;
-        if (err) {
-          throw new Error(err);
-        } else {
-          var riakObj;
-          if(rslt.isNotFound) {
-            json(res, []);
-          } else {
-            riakObj = rslt.values.shift();
-            ids = riakObj.value;
-
-            async.map(ids,
-                function(id, callback) {
-                  client.fetchValue({bucket: 'todos', key: id, convertToJs: true},
-                      function(err, rslt) {
-                        var todo = null, riakObj;
-                        if (!rslt.isNotFound) {
-                          riakObj = rslt.values.shift();
-                          if(riakObj)
-                            todo = riakObj.value;
-                        }
-                        callback(null, todo)
-                      });
-            }, function(err, rslt) {
-                  if(err) {
-                    json(res, []);
-                  } else {
-                    var obj = {};
-                    // convert the array of items into an object with keys pointing the items
-                    rslt.forEach(function(item) {
-                      if(item)
-                        obj[item.id] = item.description;
-                    });
-                    json(res, obj);
-                  }
-            });
-          }
-        }
-      }
-    );
-  } else {
-    client.hgetall("todos", function (err, data) {
+  client.hgetall("todos", function (err, data) {
       json(res, data);
-    });
-  }
+  });
 });
 
 app.post('/todos/create', function(req, res) {
@@ -190,6 +151,7 @@ app.post('/todos/create', function(req, res) {
       }
     });
   } else {
+    
     client.hset("todos", id, req.body.description);
     client.zadd("created:todos", Date.now(), id);
     json(res, { id: id });
